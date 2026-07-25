@@ -17,7 +17,9 @@ body { font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvet
 .dashboard-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
 .dashboard-tile { min-height: 120px; }
 .server-card,
-.plan-card { min-height: 140px; border-radius: 1rem; background: rgba(15,23,42,0.88); border: 1px solid rgba(255,255,255,0.08); padding: 1.25rem; }
+.plan-card { min-height: 140px; border-radius: 1rem; background: rgba(15,23,42,0.88); border: 1px solid rgba(255,255,255,0.08); padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between; }
+.server-card button,
+.plan-card button { width: fit-content; }
 .table-responsive { box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
 .form-control-dark { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); color: #e2e8f0; }
 .form-control-dark:focus { box-shadow: none; border-color: rgba(56,189,248,0.6); background: rgba(255,255,255,0.08); }

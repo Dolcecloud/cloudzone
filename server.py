@@ -107,9 +107,46 @@ def api_servers():
     return jsonify(data.get('servers', []))
 
 
+@app.route('/api/servers/update', methods=['POST'])
+def api_update_server():
+    payload = request.get_json() or {}
+    server_id = payload.get('id')
+    if not server_id:
+        return jsonify({'status': 'error', 'message': 'missing server id'}), 400
+    servers = data.get('servers', [])
+    for server in servers:
+        if server.get('id') == server_id:
+            server.update({
+                'status': payload.get('status', server.get('status')),
+                'load': payload.get('load', server.get('load')),
+                'uptime': payload.get('uptime', server.get('uptime'))
+            })
+            save_data(data)
+            return jsonify({'status': 'success', 'server': server})
+    return jsonify({'status': 'error', 'message': 'server not found'}), 404
+
+
 @app.route('/api/plans', methods=['GET'])
 def api_plans():
     return jsonify(data.get('plans', []))
+
+
+@app.route('/api/plans/update', methods=['POST'])
+def api_update_plan():
+    payload = request.get_json() or {}
+    plan_id = payload.get('id')
+    if not plan_id:
+        return jsonify({'status': 'error', 'message': 'missing plan id'}), 400
+    plans = data.get('plans', [])
+    for plan in plans:
+        if plan.get('id') == plan_id:
+            plan.update({
+                'status': payload.get('status', plan.get('status')),
+                'price': payload.get('price', plan.get('price'))
+            })
+            save_data(data)
+            return jsonify({'status': 'success', 'plan': plan})
+    return jsonify({'status': 'error', 'message': 'plan not found'}), 404
 
 
 @app.route('/api/visit', methods=['POST'])

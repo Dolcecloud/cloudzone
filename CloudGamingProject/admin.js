@@ -167,9 +167,17 @@ function renderServers(servers) {
         <span class="badge ${server.status === 'Online' ? 'bg-success' : server.status === 'Maintenance' ? 'bg-warning text-dark' : 'bg-secondary'}">${escapeHtml(server.status)}</span>
       </div>
       <p class="mb-1 text-muted">Load: ${escapeHtml(server.load || 'N/A')}</p>
-      <p class="mb-0 text-muted">Uptime: ${escapeHtml(server.uptime || 'N/A')}</p>
+      <p class="mb-1 text-muted">Uptime: ${escapeHtml(server.uptime || 'N/A')}</p>
+      <button class="btn btn-sm btn-outline-light mt-3" data-action="toggle-server" data-id="${escapeHtml(server.id)}">${server.status === 'Online' ? 'Put in Maintenance' : 'Return Online'}</button>
     `;
     grid.appendChild(card);
+  });
+  grid.querySelectorAll('[data-action="toggle-server"]').forEach(button => {
+    button.addEventListener('click', () => {
+      const serverId = button.dataset.id;
+      const server = currentServers.find(item => item.id === serverId);
+      if (server) toggleServerStatus(server);
+    });
   });
 }
 
@@ -206,13 +214,59 @@ function renderPlans(plans) {
           <h3 class="h6 mb-1">${escapeHtml(plan.name)}</h3>
           <small class="text-muted">${escapeHtml(plan.id)}</small>
         </div>
-        <span class="badge bg-info text-dark">${escapeHtml(plan.status)}</span>
+        <span class="badge ${plan.status === 'Active' ? 'bg-info text-dark' : 'bg-secondary'}">${escapeHtml(plan.status)}</span>
       </div>
       <p class="mb-1 text-muted">Price: ${escapeHtml(plan.price)}</p>
-      <p class="mb-0 text-muted">Access: ${escapeHtml(plan.users)}</p>
+      <p class="mb-1 text-muted">Access: ${escapeHtml(plan.users)}</p>
+      <button class="btn btn-sm btn-outline-light mt-3" data-action="toggle-plan" data-id="${escapeHtml(plan.id)}">${plan.status === 'Active' ? 'Disable Plan' : 'Activate Plan'}</button>
     `;
     grid.appendChild(card);
   });
+  grid.querySelectorAll('[data-action="toggle-plan"]').forEach(button => {
+    button.addEventListener('click', () => {
+      const planId = button.dataset.id;
+      const plan = currentPlans.find(item => item.id === planId);
+      if (plan) togglePlanStatus(plan);
+    });
+  });
+}
+
+async function toggleServerStatus(server) {
+  const nextStatus = server.status === 'Online' ? 'Maintenance' : 'Online';
+  try {
+    const res = await fetch('/api/servers/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: server.id, status: nextStatus })
+    });
+    const data = await res.json();
+    if (res.ok && data.status === 'success') {
+      fetchServers();
+    } else {
+      alert('Server update failed: ' + (data.message || res.statusText));
+    }
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
+}
+
+async function togglePlanStatus(plan) {
+  const nextStatus = plan.status === 'Active' ? 'Inactive' : 'Active';
+  try {
+    const res = await fetch('/api/plans/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: plan.id, status: nextStatus })
+    });
+    const data = await res.json();
+    if (res.ok && data.status === 'success') {
+      fetchPlans();
+    } else {
+      alert('Plan update failed: ' + (data.message || res.statusText));
+    }
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -253,6 +307,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const btnExportLogs = document.getElementById('btnExportLogs');
   if (btnExportLogs) btnExportLogs.addEventListener('click', exportVisitLogs);
+
+  const toggleAutoRefresh = document.getElementById('toggleAutoRefresh');
+  let autoRefreshInterval = null;
+  const setAutoRefresh = enabled => {
+    if (autoRefreshInterval) {
+      clearInterval(autoRefreshInterval);
+      autoRefreshInterval = null;
+    }
+    if (enabled) {
+      autoRefreshInterval = setInterval(() => {
+        fetchUsers();
+        fetchVisits();
+        fetchServers();
+        fetchPlans();
+      }, 15000);
+    }
+  };
+  if (toggleAutoRefresh) {
+    toggleAutoRefresh.addEventListener('change', () => {
+      setAutoRefresh(toggleAutoRefresh.checked);
+    });
+    setAutoRefresh(toggleAutoRefresh.checked);
+  }
 
   const toggleDarkMode = document.getElementById('toggleDarkMode');
   if (toggleDarkMode) toggleDarkMode.addEventListener('change', () => {
