@@ -35,16 +35,6 @@ body {
     margin: 0 auto;
 }
 
-@media (min-width: 560px) {
-    .app-container {
-        max-width: 720px;
-    }
-    .login-screen {
-        padding: 100px 32px 40px 32px;
-        max-width: 720px;
-    }
-}
-
 .hidden { display: none !important; }
 
 /* ================= LOGIN SCREEN ================= */
@@ -259,85 +249,6 @@ body {
 .avatar-placeholder { width: 36px; height: 36px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:#1f232c; color:#00e676; font-weight:900; border:2px solid #2d3340; font-size:12px; }
 .avatar-placeholder.hidden { display: none; }
 .device-ipad .avatar-placeholder { width:56px; height:56px; font-size:18px; }
-
-/* iPad / small tablet optimizations */
-@media (min-width: 768px) and (max-width: 1024px) {
-    body { padding: 30px 0; }
-    .app-container {
-        max-width: 840px;
-        min-height: 92vh;
-        padding: 10px;
-    }
-    .login-screen { padding: 100px 32px 40px 32px; }
-    .top-header { padding: 22px 24px 14px 24px; }
-    .header-top-row { gap: 18px; }
-    .header-avatar img { width: 56px; height: 56px; }
-    .search-bar-box { flex: 1; }
-    .content { padding: 24px; }
-    .game-cards-container { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .big-game-card { border-radius: 24px; }
-    .card-banner { height: 220px; }
-    .bottom-nav { height: 88px; padding: 12px 20px; }
-    .bottom-nav .nav-item { gap: 10px; padding: 10px 12px; }
-    .bottom-nav .nav-item span { display: block; font-size: 12px; }
-}
-
-/* Desktop / large screen optimizations */
-@media (min-width: 1025px) {
-    body { padding: 30px 0; }
-    .app-container {
-        max-width: 1120px;
-        min-height: 92vh;
-        border-radius: 30px;
-        margin: 20px auto;
-        box-shadow: 0 24px 90px rgba(0,0,0,0.45);
-        overflow: hidden;
-        padding: 18px;
-    }
-    .top-header {
-        width: 100%;
-        padding: 24px 26px 20px 26px;
-        border-radius: 26px;
-        background: rgba(13, 15, 18, 0.95);
-        border: 1px solid rgba(255,255,255,0.06);
-    }
-    .header-top-row { gap: 22px; }
-    .header-avatar img { width: 64px; height: 64px; }
-    .search-bar-box { max-width: 720px; }
-    .content { padding: 30px 28px 120px 28px; }
-    .game-cards-container { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .big-game-card { border-radius: 26px; }
-    .card-banner { height: 240px; }
-    .card-info h3 { font-size: 18px; }
-    .page-title { font-size: 24px; }
-    .profile-page-content { max-width: 900px; }
-    .bottom-nav {
-        position: sticky;
-        top: 18px;
-        left: auto;
-        transform: none;
-        bottom: auto;
-        margin: 0 auto 18px auto;
-        width: 100%;
-        max-width: 100%;
-        height: auto;
-        padding: 14px 24px;
-        border-radius: 30px;
-        background: rgba(13, 15, 18, 0.96);
-        border: 1px solid rgba(255,255,255,0.08);
-    }
-    .bottom-nav .nav-item {
-        flex-direction: row;
-        justify-content: flex-start;
-        gap: 10px;
-        padding: 14px 22px;
-        border-radius: 18px;
-    }
-    .bottom-nav .nav-item i { font-size: 20px; }
-    .bottom-nav .nav-item span { display: block; font-size: 13px; }
-    .bottom-nav .nav-item.active { transform: none; }
-    .bottom-nav .nav-item:hover { background: rgba(255,255,255,0.05); }
-}
 
 .search-bar-box { flex: 1; position: relative; display: flex; align-items: center; }
 
