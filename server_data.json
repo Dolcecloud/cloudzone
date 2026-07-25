@@ -1,0 +1,19 @@
+{
+    "games": [],
+    "users": {
+        "ud97cba8b9ca78db3": {
+            "id": "ud97cba8b9ca78db3",
+            "name": "Guest",
+            "device": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+            "connected_at": "2026-07-25 20:33:19"
+        }
+    },
+    "visits": [
+        {
+            "ts": "2026-07-25 20:33:19",
+            "ip": "127.0.0.1",
+            "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+            "user_id": "ud97cba8b9ca78db3"
+        }
+    ]
+}

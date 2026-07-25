@@ -1,0 +1,43 @@
+{
+    "games": [
+        {
+            "id": 1,
+            "title": "Forza Horizon 5",
+            "category": "Racing, Speed",
+            "image": "https://via.placeholder.com/300x150/1a1c23/00e676?text=Forza+Horizon+5"
+        },
+        {
+            "id": 2,
+            "title": "FC Online / EA FC 25",
+            "category": "Sports, Football",
+            "image": "https://via.placeholder.com/300x150/1a1c23/00e676?text=FC+Online"
+        },
+        {
+            "id": 3,
+            "title": "Grand Theft Auto V",
+            "category": "Open World, Action",
+            "image": "https://via.placeholder.com/300x150/1a1c23/00e676?text=GTA+5"
+        },
+        {
+            "id": 4,
+            "title": "Cyberpunk 2077",
+            "category": "RPG, Sci-Fi",
+            "image": "https://via.placeholder.com/300x150/1a1c23/00e676?text=Cyberpunk+2077"
+        },
+        {
+            "id": 5,
+            "title": "Black Myth: Wukong",
+            "category": "Action RPG",
+            "image": "https://via.placeholder.com/300x150/1a1c23/00e676?text=Wukong"
+        }
+    ],
+    "users": {
+        "u757058": {
+            "id": "u757058",
+            "name": "DOLCE",
+            "status": "Online",
+            "joined_at": "2026-07-25 14:03:51"
+        }
+    },
+    "current_user_id": "u757058"
+}

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CloudZone- Cloud Gaming</title>
+    <link id="faviconLink" rel="icon" href="avatar.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- CONTAINER CHÍNH DẠNG DỌC MOBILE -->
+    <div class="app-container" id="appContainer">
+
+        <!-- ================= 1. MÀN HÌNH ĐĂNG NHẬP ================= -->
+        <div class="login-screen" id="loginScreen">
+            <div class="login-content">
+                <div class="logo-box">
+                    <div class="cup-icon">
+                        <i class="fa-solid fa-mug-hot"></i>
+                        <span class="go-badge">GO</span>
+                    </div>
+                </div>
+                <h1 class="brand-name">CloudZone</h1>
+            </div>
+
+            <div class="login-footer">
+                <button class="btn-google-login" id="btnLoginGoogle">
+                    <svg class="google-icon" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </svg>
+                    <span>Login with Google</span>
+                </button>
+
+                <label class="terms-checkbox">
+                    <input type="checkbox" id="chkTerms">
+                    <span class="custom-check"></span>
+                    <span class="terms-text">
+                        I have read and agree to the <a href="#">User Agreement</a> and <a href="#">Privacy Policy</a>
+                    </span>
+                </label>
+            </div>
+        </div>
+
+
+        <!-- ================= 2. MÀN HÌNH CHÍNH APP ================= -->
+        <div class="main-app hidden" id="mainApp">
+            
+            <!-- VIEW TAB 1: HOME -->
+            <div class="tab-page active" id="tabHome">
+                <header class="top-header">
+                    <div class="header-top-row">
+                        <div class="header-logo">
+                            <i class="fa-solid fa-mug-hot"></i>
+                            <span class="go-badge">CLOUDZONE</span>
+                        </div>
+                        <div class="search-bar-box">
+                            <input type="text" placeholder="Search games..." class="search-input" id="searchInput">
+                            <i class="fa-solid fa-magnifying-glass search-btn-icon"></i>
+                        </div>
+                        <div class="header-avatar">
+                            <img id="siteAvatar" src="" alt="Site Avatar">
+                            <span id="avatarPlaceholder" class="avatar-placeholder hidden">CZ</span>
+                            <input type="file" id="avatarInput" accept="image/*" style="display:none">
+                            <button id="btnEditAvatar" class="avatar-edit" title="Thay avatar">✎</button>
+                        </div>
+                    </div>
+
+                    <div class="header-categories-row">
+                        <button class="btn-hamburger"><i class="fa-solid fa-bars"></i></button>
+                        <div class="categories-scroll">
+                            <a href="#" class="cat-item" data-category="foryou">For You</a>
+                            <a href="#" class="cat-item active" data-category="latest">Latest</a>
+                            <a href="#" class="cat-item" data-category="action">Action</a>
+                            <a href="#" class="cat-item" data-category="sports">Sports</a>
+                            <a href="#" class="cat-item" data-category="racing">Racing</a>
+                            <a href="#" class="cat-item" data-category="puzzle">Puzzle</a>
+                            <a href="#" class="cat-item" data-category="rhythm">Rhythm</a>
+                            <a href="#" class="cat-item" data-category="sandbox">Sandbox</a>
+                        </div>
+                    </div>
+                </header>
+
+                <main class="content">
+                    <div class="game-cards-container" id="gameCardsContainer"></div>
+                </main>
+            </div>
+
+            <!-- VIEW TAB 2: STORE / VIP MEMBERSHIP -->
+            <div class="tab-page hidden" id="tabStore">
+                <main class="content store-page-content">
+                    <h2 class="page-title">VIP Membership</h2>
+
+                    <!-- Khối hiển thị Server Cloud Gaming -->
+                    <div class="server-status-card">
+                        <div class="server-title"><i class="fa-solid fa-server"></i> Cloud Gaming Servers</div>
+                        <div class="server-list">
+                            <div class="server-item">
+                                <span class="dot-online"></span>
+                                <span class="srv-name">Server 1: Singapore</span>
+                                <span class="srv-ping">24ms</span>
+                            </div>
+                            <div class="server-item">
+                                <span class="dot-online"></span>
+                                <span class="srv-name">Server 2: Hanoi</span>
+                                <span class="srv-ping">8ms</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Danh sách các gói VIP -->
+                    <div class="store-card-list">
+                        <div class="store-card maintenance">
+                            <div class="plan-header">
+                                <h3>Weekly Pass</h3>
+                                <span class="badge-plan">7 Days</span>
+                            </div>
+                            <p class="plan-desc">Mượt mà, không chờ đợi, mở khóa full FPS.</p>
+                            <div class="price-box">
+                                <span class="price-vnd">Đang bảo trì</span>
+                                <span class="price-usd">/ Maintenance</span>
+                            </div>
+                            <button class="btn-buy-now disabled" disabled title="Gói này đang bảo trì">Đang bảo trì</button>
+                        </div>
+
+                        <div class="store-card featured">
+                            <div class="popular-tag">MOST POPULAR</div>
+                            <div class="plan-header">
+                                <h3>Monthly VIP</h3>
+                                <span class="badge-plan">30 Days</span>
+                            </div>
+                            <p class="plan-desc">Chơi game không giới hạn, ưu tiên Server Hanoi 120 FPS.</p>
+                            <div class="price-box">
+                                <span class="price-vnd">179.000 VNĐ</span>
+                                <span class="price-usd">/ $7.99 USD</span>
+                            </div>
+                            <button class="btn-buy-now highlight" onclick="openPaymentModal('Monthly VIP', '179.000 VNĐ ($7.99 USD)')">Buy Now</button>
+                        </div>
+
+                        <div class="store-card">
+                            <div class="plan-header">
+                                <h3>Yearly Pro</h3>
+                                <span class="badge-plan">365 Days</span>
+                            </div>
+                            <p class="plan-desc">Gói tiết kiệm nhất năm, nhận thêm 500 Giờ chơi thưởng.</p>
+                            <div class="price-box">
+                                <span class="price-vnd">1.290.000 VNĐ</span>
+                                <span class="price-usd">/ $54.99 USD</span>
+                            </div>
+                            <button class="btn-buy-now" onclick="openPaymentModal('Yearly Pro', '1.290.000 VNĐ ($54.99 USD)')">Buy Now</button>
+                        </div>
+                    </div>
+                </main>
+            </div>
+
+            <!-- VIEW TAB 3: ME (PROFILE) -->
+            <div class="tab-page hidden" id="tabMe">
+                <main class="content profile-page-content">
+                    
+                    <div class="profile-top-icons">
+                        <i class="fa-regular fa-comment-dots"></i>
+                        <i class="fa-solid fa-language"></i>
+                        <i class="fa-regular fa-bell"></i>
+                        <i class="fa-solid fa-gear"></i>
+                    </div>
+
+                    <div class="profile-header-user">
+                        <div class="profile-avatar-box">
+                            <i class="fa-solid fa-mug-hot"></i>
+                            <span class="go-badge-avatar">CLOUDZONE</span>
+                        </div>
+                        <div class="profile-user-info">
+                            <div class="name-edit-wrapper">
+                                <h2 id="userNameDisplay">Dreki Gaming</h2>
+                                <i class="fa-solid fa-pen-to-square edit-icon" id="btnEditName" title="Đổi tên (Chỉ 1 lần)"></i>
+                            </div>
+                            <p class="user-id" id="userIdDisplay">ID: Loading...</p>
+                        </div>
+                    </div>
+
+                    <div class="banner-upgrade-green">
+                        <div class="upgrade-left">
+                            <div class="crown-icon-box"><i class="fa-solid fa-crown"></i></div>
+                            <div class="upgrade-text">
+                                <h3>Free</h3>
+                                <p>Up to 2 hours per session</p>
+                            </div>
+                        </div>
+                        <button class="btn-dark-upgrade" onclick="switchTab('tabStore')">Upgrade</button>
+                    </div>
+
+                    <div class="profile-card">
+                        <div class="card-row-header">
+                            <div class="card-title">
+                                <i class="fa-regular fa-clock"></i>
+                                <span>Time Left</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                        </div>
+                        <div class="card-row-body">
+                            <div class="time-display">
+                                <span class="time-num green">2</span> <span class="time-unit">h</span> 
+                                <span class="time-num green">0</span> <span class="time-unit">m</span>
+                            </div>
+                            <button class="btn-action-neon" onclick="switchTab('tabStore')">Buy Time</button>
+                        </div>
+                    </div>
+
+                    <div class="profile-card clickable" onclick="alert('Mở danh sách game đang chơi dở!')">
+                        <div class="card-row-header">
+                            <div class="card-title">
+                                <i class="fa-solid fa-gamepad"></i>
+                                <span>Continue</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                        </div>
+                    </div>
+
+                    <div class="profile-card">
+                        <div class="card-row-body">
+                            <div class="card-text-group">
+                                <h4>Invite Code</h4>
+                                <p class="sub-green">Free play</p>
+                            </div>
+                            <button class="btn-action-neon" onclick="alert('Nhập mã giới thiệu!')">Enter</button>
+                        </div>
+                    </div>
+
+                    <div class="profile-card">
+                        <div class="card-row-body">
+                            <div class="card-text-group">
+                                <h4>Tasks for Playtime</h4>
+                                <p class="sub-green">Earn playtime</p>
+                            </div>
+                            <button class="btn-action-neon" onclick="alert('Mở danh sách nhiệm vụ!')">Open</button>
+                        </div>
+                    </div>
+
+                </main>
+            </div>
+
+
+
+            <!-- MENU BOTTOM NAV -->
+            <nav class="bottom-nav">
+                <a href="#" class="nav-item active" data-tab="tabHome">
+                    <i class="fa-solid fa-gamepad"></i>
+                </a>
+                <a href="#" class="nav-item" data-tab="tabStore">
+                    <i class="fa-solid fa-basket-shopping"></i>
+                </a>
+                <a href="#" class="nav-item" data-tab="tabMe">
+                    <div class="cup-icon-sm">
+                        <i class="fa-solid fa-mug-hot"></i>
+                        <span class="go-badge-sm">CLOUDZONE</span>
+                    </div>
+                    <span>Me</span>
+                </a>
+            </nav>
+
+        </div>
+
+    </div>
+
+    <!-- ================= 3. MÀN HÌNH CHỜ GAME XOAY NGANG CÓ HIỆU ỨNG ĐỘNG & TÍNH NĂNG MỚI ================= -->
+    <div class="game-loading-screen hidden" id="gameLoadingScreen">
+        
+        <!-- Thanh công cụ góc trên màn hình Game -->
+        <div class="game-top-bar">
+            <!-- Nút điều khiển âm thanh & toàn màn hình -->
+            <div class="game-controls-left">
+                <button class="btn-game-icon" id="btnToggleMic" title="Bật/Tắt Mic"><i class="fa-solid fa-microphone"></i></button>
+                <button class="btn-game-icon" id="btnToggleAudio" title="Bật/Tắt Âm thanh"><i class="fa-solid fa-volume-high"></i></button>
+                <button class="btn-game-icon" id="btnFullscreen" title="Toàn màn hình"><i class="fa-solid fa-expand"></i></button>
+            </div>
+
+            <!-- Nút Exit -->
+            <button class="btn-exit-game" id="btnExitGame">Exit</button>
+        </div>
+
+        <!-- Khối thông tin Hàng chờ Động -->
+        <div class="game-queue-box">
+            <h2 id="loadingGameTitle">Starting Game</h2>
+            
+            <div class="queue-info">
+                <i class="fa-solid fa-hourglass-half fa-spin queue-spinner"></i>
+                <span>Queue: Position <strong id="queuePos" class="highlight-green">108</strong>/108, Estimated Wait <strong id="queueTime" class="highlight-yellow">192 min 36 sec</strong></span>
+            </div>
+
+            <!-- Tiến trình đường nạp năng lượng động -->
+            <div class="loading-bar-container">
+                <div class="loading-bar-fill" id="loadingBarFill"></div>
+            </div>
+
+            <!-- Khối VIP Boost tăng tốc xếp hàng -->
+            <div class="vip-boost-banner">
+                <span><i class="fa-solid fa-bolt green-text"></i> VIP Membership gets 0-sec queue!</span>
+                <button class="btn-boost-now" id="btnBoostVIP">Skip Queue</button>
+            </div>
+        </div>
+
+        <!-- Thông số kỹ thuật mạng & FPS góc dưới -->
+        <div class="game-bottom-info">
+            <div class="fps-counter">FPS <span id="fpsValue">58</span></div>
+            <div class="ping-counter"><i class="fa-solid fa-wifi"></i> <span id="pingValue">12ms</span></div>
+        </div>
+    </div>
+
+    <!-- ================= 4. POPUP MODAL QR NẠP TIỀN TỰ ĐỘNG ================= -->
+    <div class="qr-modal-overlay hidden" id="qrModalOverlay">
+        <div class="qr-modal-box">
+            <button class="btn-close-modal" id="btnCloseModal">&times;</button>
+            <div class="modal-header">
+                <h3>Thanh Toán Tự Động</h3>
+                <p id="modalPlanName">Monthly VIP</p>
+            </div>
+
+            <div class="qr-image-wrapper">
+                <img id="qrCodeImg" src="" alt="Mã QR thanh toán mới">
+            </div>
+
+            <div class="modal-payment-info">
+                <div class="info-row">
+                    <span>Số tiền:</span>
+                    <strong id="modalPriceText" class="green-text">179.000 VNĐ</strong>
+                </div>
+                <div class="info-row">
+                    <span>Nội dung CK:</span>
+                    <strong id="modalTransferMemo" class="yellow-text">CG u24df521</strong>
+                </div>
+            </div>
+
+            <div class="modal-footer-note">
+                <i class="fa-solid fa-arrows-rotate fa-spin"></i> Hệ thống tự động kích hoạt sau khi nhận chuyển khoản
+            </div>
+        </div>
+    </div>
+
+   <!-- Load script from same folder -->
+    <script src="script.js"></script>
+</body>
+</html>
