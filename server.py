@@ -13,7 +13,17 @@ DEFAULT_DATA = {
         {"id": 3, "title": "Grand Theft Auto V", "category": "Open World, Action"}
     ],
     "users": {},
-    "visits": []
+    "visits": [],
+    "servers": [
+        {"id": "srv-east-01", "name": "East Node 1", "status": "Online", "load": "42%", "location": "EU", "uptime": "18h 32m"},
+        {"id": "srv-us-west", "name": "West Node 2", "status": "Online", "load": "37%", "location": "US", "uptime": "12h 05m"},
+        {"id": "srv-apac-03", "name": "APAC Node 3", "status": "Maintenance", "load": "68%", "location": "APAC", "uptime": "2h 20m"}
+    ],
+    "plans": [
+        {"id": "basic", "name": "Basic", "price": "Free", "users": "Unlimited", "status": "Active"},
+        {"id": "pro", "name": "Pro", "price": "$9.99/mo", "users": "Priority", "status": "Active"},
+        {"id": "enterprise", "name": "Enterprise", "price": "$29.99/mo", "users": "Premium", "status": "Active"}
+    ]
 }
 
 
@@ -90,6 +100,16 @@ def api_delete_user():
 @app.route('/api/games', methods=['GET'])
 def api_games():
     return jsonify(data.get('games', []))
+
+
+@app.route('/api/servers', methods=['GET'])
+def api_servers():
+    return jsonify(data.get('servers', []))
+
+
+@app.route('/api/plans', methods=['GET'])
+def api_plans():
+    return jsonify(data.get('plans', []))
 
 
 @app.route('/api/visit', methods=['POST'])

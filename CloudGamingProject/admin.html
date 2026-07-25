@@ -8,61 +8,179 @@
     <link rel="stylesheet" href="admin.css">
   </head>
   <body class="bg-dark text-light">
-    <nav class="navbar navbar-dark bg-dark shadow-sm">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">CloudZone Admin</a>
-        <div>
-          <a class="btn btn-sm btn-outline-light" href="index.html">Open Site</a>
+    <div class="admin-shell">
+      <aside class="admin-sidebar">
+        <div class="sidebar-brand px-4 py-4 mb-4">
+          <h3 class="mb-1">CloudZone</h3>
+          <small class="text-muted">Admin console</small>
         </div>
-      </div>
-    </nav>
+        <nav class="sidebar-nav px-3">
+          <button class="sidebar-item active" data-panel="panel-dashboard">Dashboard</button>
+          <button class="sidebar-item" data-panel="panel-users">Connected Users</button>
+          <button class="sidebar-item" data-panel="panel-visits">Visit Logs</button>
+          <button class="sidebar-item" data-panel="panel-servers">Servers</button>
+          <button class="sidebar-item" data-panel="panel-plans">Plans</button>
+          <button class="sidebar-item" data-panel="panel-settings">Settings</button>
+        </nav>
+        <div class="sidebar-footer px-4 py-4">
+          <a class="btn btn-sm btn-outline-light w-100" href="index.html">Open Site</a>
+        </div>
+      </aside>
 
-    <main class="container py-4">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-          <h2 class="h4 mb-0">Connected Users</h2>
-          <small class="text-muted">Manage currently connected clients</small>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-          <div class="badge bg-success text-dark py-2 px-3" id="visitCount">Visits: 0</div>
-          <button id="btnRefresh" class="btn btn-sm btn-primary">Refresh</button>
-        </div>
-      </div>
+      <section class="admin-main">
+        <header class="admin-header d-flex justify-content-between align-items-center px-4 py-3 mb-4">
+          <div>
+            <h1 class="h4 mb-1">CloudZone Admin</h1>
+            <p class="text-muted mb-0">Use the left menu to switch management sections.</p>
+          </div>
+          <div class="d-flex gap-2">
+            <div class="badge bg-success text-dark py-2 px-3" id="usersCount">Users: 0</div>
+            <div class="badge bg-info text-dark py-2 px-3" id="visitsCount">Visits: 0</div>
+          </div>
+        </header>
 
-      <div class="table-responsive bg-secondary bg-opacity-10 p-3 rounded mb-3">
-        <table class="table table-dark table-striped align-middle mb-0" id="usersTable">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Device</th>
-              <th>Connected At</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- rows inserted by admin.js -->
-          </tbody>
-        </table>
-      </div>
+        <div class="panel active" id="panel-dashboard">
+          <div class="panel-card mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <h2 class="h5 mb-1">Dashboard</h2>
+                <p class="text-muted mb-0">Quick overview of system load and activity.</p>
+              </div>
+              <button id="btnReloadDashboard" class="btn btn-sm btn-light">Refresh Overview</button>
+            </div>
+            <div class="dashboard-grid">
+              <div class="dashboard-tile bg-secondary bg-opacity-10 rounded p-4">
+                <h3 class="mb-2" id="dashboardUsers">0</h3>
+                <p class="mb-0 text-muted">Connected Users</p>
+              </div>
+              <div class="dashboard-tile bg-secondary bg-opacity-10 rounded p-4">
+                <h3 class="mb-2" id="dashboardVisits">0</h3>
+                <p class="mb-0 text-muted">Visit Count</p>
+              </div>
+              <div class="dashboard-tile bg-secondary bg-opacity-10 rounded p-4">
+                <h3 class="mb-2" id="dashboardServers">0</h3>
+                <p class="mb-0 text-muted">Servers Online</p>
+              </div>
+              <div class="dashboard-tile bg-secondary bg-opacity-10 rounded p-4">
+                <h3 class="mb-2" id="dashboardPlans">3</h3>
+                <p class="mb-0 text-muted">Active Plans</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      <div class="card bg-secondary bg-opacity-10 p-3 rounded mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <h3 class="h6 mb-0">Visit Logs</h3>
-          <button id="btnRefreshVisits" class="btn btn-sm btn-outline-light">Refresh Visits</button>
+        <div class="panel hidden" id="panel-users">
+          <div class="panel-card mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-3">
+              <div>
+                <h2 class="h5 mb-1">Connected Users</h2>
+                <p class="text-muted mb-0">Search, inspect, and remove connected users.</p>
+              </div>
+              <div class="d-flex gap-2 w-100 w-md-auto">
+                <input id="usersSearch" class="form-control form-control-dark" type="search" placeholder="Search users...">
+                <button id="btnRefreshUsers" class="btn btn-sm btn-primary">Reload</button>
+              </div>
+            </div>
+            <div class="table-responsive bg-secondary bg-opacity-10 p-3 rounded">
+              <table class="table table-dark table-striped align-middle mb-0" id="usersTable">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Device</th>
+                    <th>Connected At</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- rows inserted by admin.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-        <div class="table-responsive">
-          <table class="table table-dark table-striped align-middle mb-0" id="visitsTable">
-            <thead>
-              <tr><th>#</th><th>Timestamp</th><th>IP</th><th>User-Agent</th></tr>
-            </thead>
-            <tbody>
-              <tr><td colspan="4">No visits yet.</td></tr>
-            </tbody>
-          </table>
+
+        <div class="panel hidden" id="panel-visits">
+          <div class="panel-card mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-3">
+              <div>
+                <h2 class="h5 mb-1">Visit Logs</h2>
+                <p class="text-muted mb-0">Track visitor requests and user agents.</p>
+              </div>
+              <div class="d-flex gap-2 w-100 w-md-auto">
+                <input id="visitsSearch" class="form-control form-control-dark" type="search" placeholder="Filter visits...">
+                <button id="btnRefreshVisits" class="btn btn-sm btn-outline-light">Reload</button>
+              </div>
+            </div>
+            <div class="table-responsive bg-secondary bg-opacity-10 p-3 rounded">
+              <table class="table table-dark table-striped align-middle mb-0" id="visitsTable">
+                <thead>
+                  <tr><th>#</th><th>Timestamp</th><th>IP</th><th>User-Agent</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="4">No visits yet.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-      </div>
-    </main>
+
+        <div class="panel hidden" id="panel-servers">
+          <div class="panel-card mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <h2 class="h5 mb-1">Servers</h2>
+                <p class="text-muted mb-0">Monitor server status and perform quick actions.</p>
+              </div>
+              <button id="btnRefreshServers" class="btn btn-sm btn-success">Refresh Status</button>
+            </div>
+            <div id="serversGrid" class="dashboard-grid"></div>
+          </div>
+        </div>
+
+        <div class="panel hidden" id="panel-plans">
+          <div class="panel-card mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <h2 class="h5 mb-1">Plans & Subscriptions</h2>
+                <p class="text-muted mb-0">Manage membership plans, pricing and status.</p>
+              </div>
+              <button id="btnRefreshPlans" class="btn btn-sm btn-outline-light">Reload Plans</button>
+            </div>
+            <div id="plansGrid" class="dashboard-grid"></div>
+          </div>
+        </div>
+
+        <div class="panel hidden" id="panel-settings">
+          <div class="panel-card mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <h2 class="h5 mb-1">Settings</h2>
+                <p class="text-muted mb-0">Admin tools and display preferences.</p>
+              </div>
+            </div>
+            <div class="bg-secondary bg-opacity-10 rounded p-4">
+              <div class="mb-3">
+                <h3 class="h6">Admin preferences</h3>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="toggleAutoRefresh" checked>
+                  <label class="form-check-label" for="toggleAutoRefresh">Auto refresh dashboard</label>
+                </div>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="toggleDarkMode" checked>
+                  <label class="form-check-label" for="toggleDarkMode">Dark theme</label>
+                </div>
+              </div>
+              <div>
+                <h3 class="h6">Actions</h3>
+                <button id="btnClearCache" class="btn btn-sm btn-outline-light me-2">Clear Cache</button>
+                <button id="btnExportLogs" class="btn btn-sm btn-outline-light">Export Logs</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
 
     <script src="admin.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
