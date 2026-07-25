@@ -206,66 +206,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     
 
-    // Site avatar: load saved avatar (localStorage) or fallback to default
-    const siteAvatar = document.getElementById('siteAvatar');
-    const avatarPlaceholder = document.getElementById('avatarPlaceholder');
-    const avatarInput = document.getElementById('avatarInput');
-    const btnEditAvatar = document.getElementById('btnEditAvatar');
-
-    function setAvatarSrc(src) {
-        if (!siteAvatar) return;
-        siteAvatar.src = src;
-        siteAvatar.alt = 'User Avatar';
-        siteAvatar.style.display = '';
-        if (avatarPlaceholder) avatarPlaceholder.classList.add('hidden');
-        // update favicon
-        const favicon = document.getElementById('faviconLink');
-        if (favicon) {
-            try { favicon.href = src; } catch (e) {}
-        }
-    }
-
-    
-
-    if (siteAvatar) {
-        const saved = localStorage.getItem('site_avatar');
-        if (saved) {
-            setAvatarSrc(saved);
-        } else {
-            const forcedAvatar = 'https://i.imgur.com/0PWkgOY.png';
-            setAvatarSrc(forcedAvatar);
-        }
-
-        siteAvatar.onerror = () => {
-            siteAvatar.style.display = 'none';
-            if (avatarPlaceholder) avatarPlaceholder.classList.remove('hidden');
-        };
-
-        // clicking avatar or edit button opens file picker
-        if (btnEditAvatar) btnEditAvatar.addEventListener('click', () => avatarInput && avatarInput.click());
-        siteAvatar.addEventListener('click', () => avatarInput && avatarInput.click());
-
-        // handle file selection
-        if (avatarInput) {
-            avatarInput.addEventListener('change', (e) => {
-                const file = e.target.files && e.target.files[0];
-                if (!file) return;
-                if (!file.type.startsWith('image/')) return alert('Vui lòng chọn file ảnh.');
-                const reader = new FileReader();
-                reader.onload = function(ev) {
-                    const dataUrl = ev.target.result;
-                    try {
-                        localStorage.setItem('site_avatar', dataUrl);
-                    } catch (err) {
-                        console.warn('Failed to save avatar to localStorage', err);
-                    }
-                    setAvatarSrc(dataUrl);
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-    }
-
     // Simple device detection for iPad/tablet widths to apply optimized layout
     function updateDeviceClass() {
         if (window.innerWidth >= 768 && window.innerWidth <= 1024) {
