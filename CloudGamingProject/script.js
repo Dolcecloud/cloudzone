@@ -440,53 +440,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             // ensure we have a device user id
-        let savedId = localStorage.getItem('coffee_go_user_id');
-        if (!savedId) {
-            initDeviceUserId();
-            savedId = localStorage.getItem('coffee_go_user_id');
-        }
+            let savedId = localStorage.getItem('coffee_go_user_id');
+            if (!savedId) {
+                initDeviceUserId();
+                savedId = localStorage.getItem('coffee_go_user_id');
+            }
 
-        // send login info to server
-        const payload = {
-            user_id: savedId,
-            username: 'Guest',
-            device_type: navigator.userAgent || navigator.platform || 'Unknown'
-        };
-        fetch('/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        }).then(async res => {
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok) {
-                if (res.status === 503) {
-                    currentMaintenanceEnabled = true;
-                    updateMaintenanceOverlay(true);
+            // send login info to server
+            const payload = {
+                user_id: savedId,
+                username: 'Guest',
+                device_type: navigator.userAgent || navigator.platform || 'Unknown'
+            };
+            fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(async res => {
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    if (res.status === 503) {
+                        currentMaintenanceEnabled = true;
+                        updateMaintenanceOverlay(true);
+                    }
+                    throw new Error(data.message || 'Login failed');
                 }
-                throw new Error(data.message || 'Login failed');
-            }
-            return data;
-        }).then(data => {
-            console.log('Logged in to server:', data);
-            const user = (data && data.user) ? data.user : { id: savedId, name: 'Guest' };
-            saveLocalUser(user);
-            applyUserToUI(user);
-            renderGames('latest');
-            fetchMaintenanceState();
-        }).catch(err => {
-            console.warn('Failed to call /api/login', err);
-            if (currentMaintenanceEnabled) {
-                alert('Ứng dụng đang ở chế độ bảo trì. Vui lòng thử lại sau.');
-                return;
-            }
-            const fallbackUser = { id: savedId, name: 'Guest' };
-            saveLocalUser(fallbackUser);
-            applyUserToUI(fallbackUser);
-            renderGames('latest');
-            fetchMaintenanceState();
+                return data;
+            }).then(data => {
+                console.log('Logged in to server:', data);
+                const user = (data && data.user) ? data.user : { id: savedId, name: 'Guest' };
+                saveLocalUser(user);
+                applyUserToUI(user);
+                renderGames('latest');
+                fetchMaintenanceState();
+            }).catch(err => {
+                console.warn('Failed to call /api/login', err);
+                if (currentMaintenanceEnabled) {
+                    alert('Ứng dụng đang ở chế độ bảo trì. Vui lòng thử lại sau.');
+                    return;
+                }
+                const fallbackUser = { id: savedId, name: 'Guest' };
+                saveLocalUser(fallbackUser);
+                applyUserToUI(fallbackUser);
+                renderGames('latest');
+                fetchMaintenanceState();
+            });
         });
-        
-    });
+    }
 
     // Ô Tìm kiếm Game
     const searchInput = document.getElementById('searchInput');
