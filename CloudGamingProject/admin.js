@@ -24,6 +24,7 @@ let currentUsers = [];
 let currentVisits = [];
 let currentServers = [];
 let currentPlans = [];
+let currentMaintenanceEnabled = false;
 
 function ensureAdminNotice() {
   let el = document.getElementById('adminNotice');
@@ -155,6 +156,58 @@ function updateDashboardStats() {
   if (dashboardVisits) dashboardVisits.textContent = visitsTotal;
   if (dashboardServers) dashboardServers.textContent = serversTotal;
   if (dashboardPlans) dashboardPlans.textContent = plansTotal;
+}
+
+async function fetchMaintenanceState() {
+  const badge = document.getElementById('maintenanceStatusBadge');
+  if (badge) badge.textContent = 'Checking...';
+  try {
+    if (location.protocol === 'file:') throw new Error('file protocol');
+    const res = await fetch(`${location.origin}/api/maintenance`);
+    if (!res.ok) throw new Error('Network response not ok');
+    const json = await res.json();
+    currentMaintenanceEnabled = Boolean(json.maintenance);
+  } catch (e) {
+    console.warn('fetchMaintenanceState failed:', e);
+    showAdminNotice('Không thể tải trạng thái bảo trì.');
+    currentMaintenanceEnabled = false;
+  }
+  updateMaintenanceControls();
+  return currentMaintenanceEnabled;
+}
+
+function updateMaintenanceControls() {
+  const button = document.getElementById('btnToggleMaintenance');
+  const badge = document.getElementById('maintenanceStatusBadge');
+  if (badge) {
+    badge.textContent = currentMaintenanceEnabled ? 'Maintenance ON' : 'Maintenance OFF';
+    badge.className = `badge ${currentMaintenanceEnabled ? 'bg-warning text-dark' : 'bg-success text-dark'} py-2 px-3`;
+  }
+  if (button) {
+    button.textContent = currentMaintenanceEnabled ? 'Disable Maintenance Mode' : 'Enable Maintenance Mode';
+  }
+}
+
+async function setMaintenanceState(enabled) {
+  try {
+    const res = await fetch(`${location.origin}/api/maintenance/update`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ maintenance: enabled })
+    });
+    const data = await res.json();
+    if (res.ok && data.status === 'success') {
+      currentMaintenanceEnabled = Boolean(data.maintenance);
+      showAdminNotice(`Maintenance mode ${currentMaintenanceEnabled ? 'enabled' : 'disabled'}.`);
+    } else {
+      throw new Error(data.message || 'Unable to update maintenance mode');
+    }
+  } catch (err) {
+    console.warn('setMaintenanceState failed:', err);
+    showAdminNotice('Không thể cập nhật chế độ bảo trì.');
+  }
+  updateMaintenanceControls();
+  return currentMaintenanceEnabled;
 }
 
 function filterUsers(query) {
@@ -349,6 +402,12 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchVisits();
     fetchServers();
     fetchPlans();
+    fetchMaintenanceState();
+  });
+
+  const btnToggleMaintenance = document.getElementById('btnToggleMaintenance');
+  if (btnToggleMaintenance) btnToggleMaintenance.addEventListener('click', () => {
+    setMaintenanceState(!currentMaintenanceEnabled);
   });
 
   const btnClearCache = document.getElementById('btnClearCache');
@@ -373,6 +432,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchVisits();
         fetchServers();
         fetchPlans();
+        fetchMaintenanceState();
       }, 15000);
     }
   };
@@ -393,9 +453,9 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchVisits();
   fetchServers();
   fetchPlans();
+  fetchMaintenanceState();
   showPanel('panel-dashboard');
 });
-
 function exportVisitLogs() {
   const rows = currentVisits.map((item, index) => [index + 1, item.ts, item.ip, item.ua]);
   const csv = ['No,Timestamp,IP,User-Agent', ...rows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(','))].join('\n');

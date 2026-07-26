@@ -64,5 +64,6 @@
             "users": "Premium",
             "status": "Active"
         }
-    ]
+    ],
+    "maintenance": false
 }

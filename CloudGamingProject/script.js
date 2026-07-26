@@ -62,6 +62,7 @@ let queueInterval = null;
 let fpsInterval = null;
 let currentQueuePos = 108;
 let currentTotalSeconds = 11556; // 192 phút 36 giây
+let currentMaintenanceEnabled = false;
 
 // 2. TỰ ĐỘNG KHỞI TẠO ID NGƯỜI DÙNG TỰ ĐỘNG THEO MÁY
 function initDeviceUserId() {
@@ -103,6 +104,52 @@ function applyUserToUI(user) {
     if (userIdDisplay && user.id) userIdDisplay.textContent = 'ID: ' + user.id;
     // show draggable support bubble
     try { createSupportBubble(); } catch (e) { console.warn('createSupportBubble failed', e); }
+}
+
+function updateMaintenanceOverlay(enabled) {
+    const overlay = document.getElementById('maintenanceOverlay');
+    const loginScreen = document.getElementById('loginScreen');
+    const mainApp = document.getElementById('mainApp');
+    const btnLoginGoogle = document.getElementById('btnLoginGoogle');
+    const chkTerms = document.getElementById('chkTerms');
+    if (!overlay) return;
+
+    if (enabled) {
+        overlay.classList.remove('hidden');
+        if (loginScreen) loginScreen.classList.add('hidden');
+        if (mainApp) mainApp.classList.add('hidden');
+        if (btnLoginGoogle) btnLoginGoogle.disabled = true;
+        if (chkTerms) chkTerms.disabled = true;
+    } else {
+        overlay.classList.add('hidden');
+        if (btnLoginGoogle) btnLoginGoogle.disabled = false;
+        if (chkTerms) chkTerms.disabled = false;
+        const savedUser = loadLocalUser();
+        if (savedUser) {
+            if (loginScreen) loginScreen.classList.add('hidden');
+            if (mainApp) mainApp.classList.remove('hidden');
+        } else {
+            if (loginScreen) loginScreen.classList.remove('hidden');
+            if (mainApp) mainApp.classList.add('hidden');
+        }
+    }
+}
+
+async function fetchMaintenanceState() {
+    let enabled = false;
+    try {
+        if (location.protocol === 'file:') throw new Error('file protocol');
+        const res = await fetch(`${location.origin}/api/maintenance`);
+        if (!res.ok) throw new Error('Network response not ok');
+        const json = await res.json();
+        enabled = Boolean(json.maintenance);
+    } catch (e) {
+        console.warn('fetchMaintenanceState failed:', e);
+        enabled = false;
+    }
+    currentMaintenanceEnabled = enabled;
+    updateMaintenanceOverlay(enabled);
+    return enabled;
 }
 
 // Create a small draggable support bubble (opens Telegram chat)
@@ -371,11 +418,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainApp = document.getElementById('mainApp');
     const btnLoginGoogle = document.getElementById('btnLoginGoogle');
     const chkTerms = document.getElementById('chkTerms');
+    if (btnLoginGoogle) btnLoginGoogle.disabled = true;
+    if (chkTerms) chkTerms.disabled = true;
+    fetchMaintenanceState();
 
     // Đăng nhập Google
     btnLoginGoogle.addEventListener('click', () => {
         if (!chkTerms.checked) {
             alert('Vui lòng đồng ý với Điều khoản!');
+            return;
+        }
+        if (currentMaintenanceEnabled) {
+            alert('Ứng dụng đang ở chế độ bảo trì. Vui lòng thử lại sau.');
             return;
         }
         // ensure we have a device user id
@@ -403,6 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
             saveLocalUser(user);
             applyUserToUI(user);
             renderGames('latest');
+            fetchMaintenanceState();
         }).catch(err => {
             console.warn('Failed to call /api/login', err);
             // fallback: use device id and default Guest name and persist locally
@@ -410,6 +465,7 @@ document.addEventListener('DOMContentLoaded', () => {
             saveLocalUser(fallbackUser);
             applyUserToUI(fallbackUser);
             renderGames('latest');
+            fetchMaintenanceState();
         });
         
     });
@@ -427,6 +483,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Nút Exit thoát Game
     const btnExitGame = document.getElementById('btnExitGame');
     const gameLoadingScreen = document.getElementById('gameLoadingScreen');
+
+    const maintenanceRetryButton = document.getElementById('maintenanceRetryButton');
+    if (maintenanceRetryButton) maintenanceRetryButton.addEventListener('click', () => {
+        fetchMaintenanceState();
+    });
+
+    fetchMaintenanceState();
 
     btnExitGame.addEventListener('click', () => {
         stopDynamicQueue();

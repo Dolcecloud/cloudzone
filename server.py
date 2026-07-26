@@ -23,7 +23,8 @@ DEFAULT_DATA = {
         {"id": "basic", "name": "Basic", "price": "Free", "users": "Unlimited", "status": "Active"},
         {"id": "pro", "name": "Pro", "price": "$9.99/mo", "users": "Priority", "status": "Active"},
         {"id": "enterprise", "name": "Enterprise", "price": "$29.99/mo", "users": "Premium", "status": "Active"}
-    ]
+    ],
+    "maintenance": false
 }
 
 
@@ -48,10 +49,14 @@ app = Flask(__name__, static_folder='CloudGamingProject', static_url_path='')
 CORS(app)
 
 data = load_data()
+data.setdefault('maintenance', False)
 
 
 @app.route('/api/login', methods=['POST'])
 def api_login():
+    if data.get('maintenance'):
+        return jsonify({'status': 'error', 'message': 'maintenance mode enabled'}), 503
+
     payload = request.get_json() or {}
     user_id = payload.get('user_id') or f"u{int(time.time())}"
     username = payload.get('username') or 'Guest'
@@ -121,6 +126,26 @@ def api_update_user():
 @app.route('/api/games', methods=['GET'])
 def api_games():
     return jsonify(data.get('games', []))
+
+
+@app.route('/api/maintenance', methods=['GET'])
+def api_maintenance():
+    return jsonify({'maintenance': bool(data.get('maintenance', False))})
+
+
+@app.route('/api/maintenance/update', methods=['POST'])
+def api_update_maintenance():
+    payload = request.get_json() or {}
+    if 'maintenance' not in payload:
+        return jsonify({'status': 'error', 'message': 'missing maintenance flag'}), 400
+    maintenance = payload.get('maintenance')
+    if isinstance(maintenance, str):
+        maintenance = maintenance.lower() in ('true', '1', 'yes', 'on')
+    else:
+        maintenance = bool(maintenance)
+    data['maintenance'] = maintenance
+    save_data(data)
+    return jsonify({'status': 'success', 'maintenance': data['maintenance']})
 
 
 @app.route('/api/servers', methods=['GET'])
