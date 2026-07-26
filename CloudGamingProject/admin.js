@@ -160,7 +160,10 @@ function updateDashboardStats() {
 
 async function fetchMaintenanceState() {
   const badge = document.getElementById('maintenanceStatusBadge');
-  if (badge) badge.textContent = 'Checking...';
+  if (badge) {
+    badge.textContent = 'Checking...';
+    badge.className = 'badge bg-secondary text-dark py-2 px-3';
+  }
   try {
     if (location.protocol === 'file:') throw new Error('file protocol');
     const res = await fetch(`${location.origin}/api/maintenance`);
@@ -169,7 +172,7 @@ async function fetchMaintenanceState() {
     currentMaintenanceEnabled = Boolean(json.maintenance);
   } catch (e) {
     console.warn('fetchMaintenanceState failed:', e);
-    showAdminNotice('Không thể tải trạng thái bảo trì.');
+    showAdminNotice('Không thể tải trạng thái bảo trì. Mở admin bằng đường dẫn server.');
     currentMaintenanceEnabled = false;
   }
   updateMaintenanceControls();
@@ -185,10 +188,13 @@ function updateMaintenanceControls() {
   }
   if (button) {
     button.textContent = currentMaintenanceEnabled ? 'Disable Maintenance Mode' : 'Enable Maintenance Mode';
+    button.disabled = false;
   }
 }
 
 async function setMaintenanceState(enabled) {
+  const button = document.getElementById('btnToggleMaintenance');
+  if (button) button.disabled = true;
   try {
     const res = await fetch(`${location.origin}/api/maintenance/update`, {
       method: 'POST',
@@ -205,8 +211,9 @@ async function setMaintenanceState(enabled) {
   } catch (err) {
     console.warn('setMaintenanceState failed:', err);
     showAdminNotice('Không thể cập nhật chế độ bảo trì.');
+  } finally {
+    updateMaintenanceControls();
   }
-  updateMaintenanceControls();
   return currentMaintenanceEnabled;
 }
 

@@ -221,6 +221,14 @@ def api_visits():
     return jsonify({'count': len(visits), 'visits': visits})
 
 
+@app.route('/admin', methods=['GET'])
+def admin_page():
+    try:
+        return app.send_static_file('admin.html')
+    except Exception:
+        return 'Admin console unavailable.'
+
+
 @app.route('/', methods=['GET'])
 def index():
     # Serve static index if present
