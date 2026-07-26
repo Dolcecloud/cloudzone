@@ -420,19 +420,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const chkTerms = document.getElementById('chkTerms');
     if (btnLoginGoogle) btnLoginGoogle.disabled = true;
     if (chkTerms) chkTerms.disabled = true;
-    fetchMaintenanceState();
+
+    fetchMaintenanceState().finally(() => {
+        if (!currentMaintenanceEnabled) {
+            if (btnLoginGoogle) btnLoginGoogle.disabled = false;
+            if (chkTerms) chkTerms.disabled = false;
+        }
+    });
 
     // Đăng nhập Google
-    btnLoginGoogle.addEventListener('click', () => {
-        if (!chkTerms.checked) {
-            alert('Vui lòng đồng ý với Điều khoản!');
-            return;
-        }
-        if (currentMaintenanceEnabled) {
-            alert('Ứng dụng đang ở chế độ bảo trì. Vui lòng thử lại sau.');
-            return;
-        }
-        // ensure we have a device user id
+    if (btnLoginGoogle) {
+        btnLoginGoogle.addEventListener('click', () => {
+            if (!chkTerms.checked) {
+                alert('Vui lòng đồng ý với Điều khoản!');
+                return;
+            }
+            if (currentMaintenanceEnabled) {
+                alert('Ứng dụng đang ở chế độ bảo trì. Vui lòng thử lại sau.');
+                return;
+            }
+            // ensure we have a device user id
         let savedId = localStorage.getItem('coffee_go_user_id');
         if (!savedId) {
             initDeviceUserId();
@@ -449,18 +456,29 @@ document.addEventListener('DOMContentLoaded', () => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
-        }).then(res => res.json()).then(data => {
+        }).then(async res => {
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                if (res.status === 503) {
+                    currentMaintenanceEnabled = true;
+                    updateMaintenanceOverlay(true);
+                }
+                throw new Error(data.message || 'Login failed');
+            }
+            return data;
+        }).then(data => {
             console.log('Logged in to server:', data);
-            // server returns user in { user: {...} }
             const user = (data && data.user) ? data.user : { id: savedId, name: 'Guest' };
-            // persist locally so next visits auto-login
             saveLocalUser(user);
             applyUserToUI(user);
             renderGames('latest');
             fetchMaintenanceState();
         }).catch(err => {
             console.warn('Failed to call /api/login', err);
-            // fallback: use device id and default Guest name and persist locally
+            if (currentMaintenanceEnabled) {
+                alert('Ứng dụng đang ở chế độ bảo trì. Vui lòng thử lại sau.');
+                return;
+            }
             const fallbackUser = { id: savedId, name: 'Guest' };
             saveLocalUser(fallbackUser);
             applyUserToUI(fallbackUser);
