@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import json
 import os
@@ -45,7 +45,9 @@ def save_data(data):
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 
-app = Flask(__name__, static_folder='CloudGamingProject', static_url_path='')
+STATIC_DIR = os.path.join(os.path.dirname(__file__), 'CloudGamingProject')
+app = Flask(__name__, static_folder=STATIC_DIR, static_url_path='/static')
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 CORS(app)
 
 data = load_data()
@@ -197,7 +199,8 @@ def api_update_plan():
 
 @app.route('/api/visit', methods=['POST'])
 def api_visit():
-    # Record a visit with timestamp, IP and user-agent
+    # Record a visit with timestamp, IP, user ID and user agent
+    payload = request.get_json(silent=True) or {}
     data.setdefault('visits', [])
     try:
         ua = request.headers.get('User-Agent', '')
@@ -205,8 +208,11 @@ def api_visit():
         record = {
             'ts': time.strftime('%Y-%m-%d %H:%M:%S'),
             'ip': ip,
-            'ua': ua
+            'ua': ua,
+            'user_id': payload.get('user_id') or payload.get('id') or ''
         }
+        if payload.get('username'):
+            record['username'] = payload.get('username')
         data['visits'].append(record)
     except Exception:
         # fallback: do nothing
@@ -222,11 +228,37 @@ def api_visits():
 
 
 @app.route('/admin', methods=['GET'])
+@app.route('/admin/', methods=['GET'])
+@app.route('/admin.html', methods=['GET'])
 def admin_page():
     try:
         return app.send_static_file('admin.html')
     except Exception:
         return 'Admin console unavailable.'
+
+
+@app.route('/admin.css', methods=['GET'])
+def admin_css():
+    try:
+        return app.send_static_file('admin.css')
+    except Exception:
+        return 'Admin CSS unavailable.', 404
+
+
+@app.route('/admin.js', methods=['GET'])
+def admin_js():
+    try:
+        return app.send_static_file('admin.js')
+    except Exception:
+        return 'Admin JS unavailable.', 404
+
+
+@app.route('/index.html', methods=['GET'])
+def index_html():
+    try:
+        return app.send_static_file('index.html')
+    except Exception:
+        return 'App homepage unavailable.'
 
 
 @app.route('/', methods=['GET'])
