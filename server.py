@@ -97,6 +97,27 @@ def api_delete_user():
     return jsonify({'status': 'error', 'message': 'user not found'}), 404
 
 
+@app.route('/api/users/update', methods=['POST'])
+def api_update_user():
+    payload = request.get_json() or {}
+    user_id = payload.get('user_id') or payload.get('id')
+    if not user_id:
+        return jsonify({'status': 'error', 'message': 'missing user_id'}), 400
+    users = data.get('users', {})
+    if user_id not in users:
+        return jsonify({'status': 'error', 'message': 'user not found'}), 404
+    # allow updating name and device
+    user = users[user_id]
+    if 'name' in payload:
+        user['name'] = payload.get('name')
+    if 'device' in payload:
+        user['device'] = payload.get('device')
+    # save and return updated user
+    data['users'][user_id] = user
+    save_data(data)
+    return jsonify({'status': 'success', 'user': user})
+
+
 @app.route('/api/games', methods=['GET'])
 def api_games():
     return jsonify(data.get('games', []))

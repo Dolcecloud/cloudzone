@@ -1,4 +1,5 @@
-body { font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+.admin-root, html, body { height: 100%; }
+body { margin: 0; font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
 .admin-shell { display: flex; min-height: 100vh; }
 .admin-sidebar { width: 260px; background: rgba(10,12,16,0.98); border-right: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; }
 .sidebar-brand { border-bottom: 1px solid rgba(255,255,255,0.06); }
@@ -9,7 +10,13 @@ body { font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvet
 .sidebar-item:hover, .sidebar-item.active { background: rgba(255,255,255,0.06); color: #fff; }
 .sidebar-footer { margin-top: auto; }
 .admin-main { flex: 1; padding: 1.5rem; }
-.admin-header { border-bottom: 1px solid rgba(255,255,255,0.06); }
+.admin-header {
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent 60%);
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
 .admin-header h1 { color: #f8fafc; }
 .panel { display: none; }
 .panel.active { display: block; }

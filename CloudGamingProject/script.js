@@ -12,7 +12,50 @@ const gamesData = [
     { id: 10, title: "Palworld", category: "Open World, Sandbox, Crafting", tab: "sandbox", image: "https://cdn.akamai.steamstatic.com/steam/apps/1623730/header.jpg" },
     { id: 11, title: "Minecraft Java Edition", category: "Sandbox, Adventure, Crafting", tab: "sandbox", image: "https://cdn.akamai.steamstatic.com/steam/apps/1172470/header.jpg" },
     { id: 12, title: "Elden Ring", category: "Fantasy, Dark Fantasy, Open World", tab: "action", image: "https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg" }
+    ,
+    { id: 13, title: "Baldur's Gate 3", category: "RPG, Party-based, Fantasy", tab: "foryou", image: "https://cdn.akamai.steamstatic.com/steam/apps/1086940/header.jpg" },
+    { id: 14, title: "Hogwarts Legacy", category: "Adventure, Open World, Fantasy", tab: "latest", image: "https://cdn.akamai.steamstatic.com/steam/apps/990080/header.jpg" },
+    { id: 15, title: "Starfield", category: "Sci-Fi, RPG, Open World", tab: "latest", image: "https://cdn.akamai.steamstatic.com/steam/apps/1716740/header.jpg" },
+    { id: 16, title: "Sons of the Forest", category: "Survival, Horror, Open World", tab: "latest", image: "https://cdn.akamai.steamstatic.com/steam/apps/1105700/header.jpg" },
+    { id: 17, title: "Atomic Heart", category: "Action, FPS, Sci-Fi", tab: "action", image: "https://cdn.akamai.steamstatic.com/steam/apps/668580/header.jpg" },
+    { id: 18, title: "Phasmophobia", category: "Horror, Co-op, Ghost Hunting", tab: "foryou", image: "https://cdn.akamai.steamstatic.com/steam/apps/739630/header.jpg" }
 ];
+
+// --- Steam auto-fetch support ---
+const STEAM_POPULAR_APPIDS = [1086940, 990080, 1716740, 1105700, 668580, 739630];
+
+async function fetchSteamGames(appIds = STEAM_POPULAR_APPIDS) {
+    const results = [];
+    try {
+        await Promise.all(appIds.map(async (appid) => {
+            try {
+                const res = await fetch(`https://store.steampowered.com/api/appdetails?appids=${appid}&cc=us&l=en`);
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data && data[appid] && data[appid].success && data[appid].data) {
+                    const info = data[appid].data;
+                    results.push({
+                        id: Number(appid),
+                        title: info.name || `Game ${appid}`,
+                        category: (info.genres && info.genres.map(g=>g.description).join(', ')) || (info.categories && info.categories.map(c=>c.description).join(', ')) || 'Game',
+                        tab: 'latest',
+                        image: info.header_image || info.image || ''
+                    });
+                }
+            } catch (e) {
+                console.warn('steam fetch app', appid, 'failed', e);
+            }
+        }));
+    } catch (e) {
+        console.warn('fetchSteamGames failed', e);
+    }
+
+    if (results.length > 0) {
+        // prepend fetched games so they're shown first
+        gamesData.unshift(...results);
+    }
+    return results;
+}
 
 // BIẾN QUẢN LÝ TIẾN TRÌNH LÀM MỚI TỰ ĐỘNG (REAL-TIME)
 let queueInterval = null;
@@ -34,6 +77,95 @@ function initDeviceUserId() {
     
     if (userIdDisplay) userIdDisplay.textContent = 'ID: ' + savedId;
     if (modalTransferMemo) modalTransferMemo.textContent = 'CG ' + savedId.substring(0, 9);
+}
+
+// --- Persistent user helpers ---
+function saveLocalUser(user) {
+    try { localStorage.setItem('coffee_go_user', JSON.stringify(user)); } catch (e) { console.warn('saveLocalUser failed', e); }
+}
+
+function loadLocalUser() {
+    try { return JSON.parse(localStorage.getItem('coffee_go_user') || 'null'); } catch (e) { return null; }
+}
+
+function applyUserToUI(user) {
+    if (!user) return;
+    const loginScreen = document.getElementById('loginScreen');
+    const mainApp = document.getElementById('mainApp');
+    const userNameDisplay = document.getElementById('userNameDisplay');
+    const userIdDisplay = document.getElementById('userIdDisplay');
+
+    if (loginScreen && mainApp) {
+        loginScreen.classList.add('hidden');
+        mainApp.classList.remove('hidden');
+    }
+    if (userNameDisplay && user.name) userNameDisplay.textContent = user.name;
+    if (userIdDisplay && user.id) userIdDisplay.textContent = 'ID: ' + user.id;
+    // show draggable support bubble
+    try { createSupportBubble(); } catch (e) { console.warn('createSupportBubble failed', e); }
+}
+
+// Create a small draggable support bubble (opens Telegram chat)
+function createSupportBubble() {
+    if (document.getElementById('supportBubble')) return;
+    const container = document.getElementById('appContainer') || document.body;
+    const bubble = document.createElement('button');
+    bubble.id = 'supportBubble';
+    bubble.className = 'support-bubble';
+    bubble.setAttribute('aria-label', 'Support chat');
+    bubble.innerHTML = '<i class="fa-brands fa-telegram-plane"></i>';
+    container.appendChild(bubble);
+
+    // initial position (inside container coords)
+    const saved = (function(){ try { return JSON.parse(localStorage.getItem('support_bubble_pos')||'null'); } catch(e){return null;} })();
+    const rect = container.getBoundingClientRect();
+    const w = bubble.offsetWidth || 52;
+    const h = bubble.offsetHeight || 52;
+    let pos = saved || { x: rect.width - w - 16, y: 120 };
+    // apply
+    bubble.style.left = Math.max(8, Math.min(pos.x, rect.width - w - 8)) + 'px';
+    bubble.style.top = Math.max(8, Math.min(pos.y, rect.height - h - 8)) + 'px';
+
+    let dragging = false;
+    let startX = 0, startY = 0, origX = 0, origY = 0;
+
+    bubble.addEventListener('pointerdown', (ev) => {
+        ev.preventDefault();
+        dragging = true;
+        bubble.setPointerCapture(ev.pointerId);
+        startX = ev.clientX; startY = ev.clientY;
+        origX = parseFloat(bubble.style.left) || 0;
+        origY = parseFloat(bubble.style.top) || 0;
+        bubble.classList.add('dragging');
+    });
+
+    bubble.addEventListener('pointermove', (ev) => {
+        if (!dragging) return;
+        const dx = ev.clientX - startX; const dy = ev.clientY - startY;
+        let nx = origX + dx; let ny = origY + dy;
+        const maxX = container.clientWidth - bubble.offsetWidth - 8;
+        const maxY = container.clientHeight - bubble.offsetHeight - 8;
+        nx = Math.max(8, Math.min(nx, maxX));
+        ny = Math.max(8, Math.min(ny, maxY));
+        bubble.style.left = nx + 'px'; bubble.style.top = ny + 'px';
+    });
+
+    const endDrag = (ev) => {
+        if (!dragging) return;
+        dragging = false;
+        try { bubble.releasePointerCapture(ev.pointerId); } catch(e){}
+        bubble.classList.remove('dragging');
+        const final = { x: parseFloat(bubble.style.left)||0, y: parseFloat(bubble.style.top)||0 };
+        try { localStorage.setItem('support_bubble_pos', JSON.stringify(final)); } catch(e) {}
+    };
+    bubble.addEventListener('pointerup', endDrag);
+    bubble.addEventListener('pointercancel', endDrag);
+
+    bubble.addEventListener('click', (e) => {
+        // open Telegram support (configured channel)
+        const tgLink = 'https://t.me/cloudzonegaming';
+        window.open(tgLink, '_blank', 'noopener');
+    });
 }
 
 // 3. HIỆU ỨNG HÀNG CHỜ VÀ FPS CHẠY ĐỘNG (KHÔNG BỊ ĐỨNG HÌNH)
@@ -204,6 +336,19 @@ async function openPaymentModal(planName, priceText) {
 document.addEventListener('DOMContentLoaded', () => {
     initDeviceUserId();
 
+    // Auto-login if we have a saved user
+    const savedUser = loadLocalUser();
+    if (savedUser) {
+        applyUserToUI(savedUser);
+        renderGames('latest');
+        // do NOT return here — continue to bind event listeners so menus still work
+    }
+
+    // Try to fetch latest popular games from Steam and update the list (best-effort)
+    fetchSteamGames().then(fetched => {
+        if (fetched && fetched.length) console.log('Fetched steam games:', fetched.map(g=>g.title));
+    }).catch(() => {});
+
     
 
     // Simple device detection for iPad/tablet widths to apply optimized layout
@@ -252,13 +397,21 @@ document.addEventListener('DOMContentLoaded', () => {
             body: JSON.stringify(payload)
         }).then(res => res.json()).then(data => {
             console.log('Logged in to server:', data);
+            // server returns user in { user: {...} }
+            const user = (data && data.user) ? data.user : { id: savedId, name: 'Guest' };
+            // persist locally so next visits auto-login
+            saveLocalUser(user);
+            applyUserToUI(user);
+            renderGames('latest');
         }).catch(err => {
             console.warn('Failed to call /api/login', err);
+            // fallback: use device id and default Guest name and persist locally
+            const fallbackUser = { id: savedId, name: 'Guest' };
+            saveLocalUser(fallbackUser);
+            applyUserToUI(fallbackUser);
+            renderGames('latest');
         });
-
-        loginScreen.classList.add('hidden');
-        mainApp.classList.remove('hidden');
-        renderGames('latest');
+        
     });
 
     // Ô Tìm kiếm Game
@@ -357,10 +510,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const newName = prompt("Nhập tên mới của bạn (Chỉ được đổi 1 lần):", userNameDisplay.textContent);
         if (newName && newName.trim() !== "") {
-            userNameDisplay.textContent = newName.trim();
-            hasChangedName = true;
-            btnEditName.classList.add('disabled');
-            alert("Đổi tên thành công!");
+            const trimmed = newName.trim();
+            // Attempt to update server and persist locally
+            const savedLocal = loadLocalUser();
+            const deviceId = localStorage.getItem('coffee_go_user_id') || (savedLocal && savedLocal.id);
+            if (!deviceId) {
+                alert('Không tìm thấy user id. Hãy đăng nhập lại.');
+                return;
+            }
+
+            fetch(`${location.origin}/api/users/update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: deviceId, name: trimmed })
+            }).then(res => res.json()).then(resp => {
+                if (resp && resp.status === 'success') {
+                    userNameDisplay.textContent = trimmed;
+                    hasChangedName = true;
+                    btnEditName.classList.add('disabled');
+                    // update saved local user
+                    const updatedUser = Object.assign({}, savedLocal || {}, { id: deviceId, name: trimmed });
+                    saveLocalUser(updatedUser);
+                    alert('Đổi tên thành công!');
+                } else {
+                    // fallback: still update locally
+                    userNameDisplay.textContent = trimmed;
+                    hasChangedName = true;
+                    btnEditName.classList.add('disabled');
+                    const updatedUser = Object.assign({}, savedLocal || {}, { id: deviceId, name: trimmed });
+                    saveLocalUser(updatedUser);
+                    alert('Đổi tên lưu cục bộ thành công (server không phản hồi).');
+                }
+            }).catch(err => {
+                console.warn('update name failed', err);
+                userNameDisplay.textContent = trimmed;
+                hasChangedName = true;
+                btnEditName.classList.add('disabled');
+                const updatedUser = Object.assign({}, savedLocal || {}, { id: deviceId, name: trimmed });
+                saveLocalUser(updatedUser);
+                alert('Đổi tên lưu cục bộ thành công (lỗi mạng).');
+            });
         }
     });
 
