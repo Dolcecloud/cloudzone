@@ -15,7 +15,7 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     overflow-y: auto;
-    padding: 0;
+    padding: 20px 0;
     background-image: radial-gradient(circle at top left, rgba(0, 230, 118, 0.14), transparent 22%),
                       radial-gradient(circle at bottom right, rgba(5, 255, 210, 0.08), transparent 28%);
 }
@@ -23,7 +23,8 @@ body {
 .app-container {
     width: 100%;
     max-width: 420px;
-    height: 100vh;
+    min-height: 100vh;
+    height: auto;
     background-color: #0d0f12;
     position: relative;
     display: flex;
@@ -40,12 +41,12 @@ body {
 .login-screen {
     width: 100%;
     max-width: 640px;
-    min-height: 100vh;
+    min-height: calc(100vh - 40px);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    padding: 40px 24px 40px 24px;
+    padding: 100px 24px 40px 24px;
     background-color: #0d0f12;
     margin: 0 auto;
 }
@@ -221,10 +222,42 @@ body {
 }
 
 .search-input::placeholder { color: #8f94a1; }
-.search-btn-icon { position: absolute; right: 18px; color: #8f94a1; font-size: 16px; }
 
 .header-categories-row { display: flex; align-items: center; gap: 14px; }
 
+.btn-hamburger { background: none; border: none; color: #ffffff; font-size: 18px; cursor: pointer; }
+
+.categories-scroll {
+    display: flex;
+    gap: 18px;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+}
+.categories-scroll::-webkit-scrollbar { display: none; }
+
+.cat-item { color: #8f94a1; text-decoration: none; font-size: 14px; font-weight: 600; }
+.cat-item.active { color: #ffffff; font-size: 15px; font-weight: 800; }
+
+
+.search-bar-box { flex: 1; position: relative; display: flex; align-items: center; }
+
+.search-input {
+    width: 100%;
+    height: 42px;
+    background-color: #20252f;
+    border: 1px solid #2e3342;
+    border-radius: 22px;
+    padding: 0 48px 0 18px;
+    color: #ffffff;
+    font-size: 15px;
+    outline: none;
+}
+
+.search-input::placeholder { color: #8f94a1; }
+.search-btn-icon { position: absolute; right: 18px; color: #8f94a1; font-size: 16px; }
+
+.header-categories-row { display: flex; align-items: center; gap: 14px; }
 .btn-hamburger { background: none; border: none; color: #ffffff; font-size: 18px; cursor: pointer; }
 
 .categories-scroll {
@@ -337,6 +370,8 @@ body {
 .go-badge-avatar { position: absolute; font-size: 8px; font-weight: 900; color: #0d0f12; background-color: #00e676; padding: 1px 3px; border-radius: 4px; top: 50%; transform: translateY(-20%); }
 .profile-user-info .user-id { font-size: 12px; color: #6c727f; margin-top: 2px; }
 
+
+
 .name-edit-wrapper { display: flex; align-items: center; gap: 8px; }
 .name-edit-wrapper h2 { font-size: 18px; font-weight: 800; color: #ffffff; }
 .edit-icon { color: #00e676; font-size: 14px; cursor: pointer; transition: 0.2s; }
@@ -405,11 +440,13 @@ body {
 .bottom-nav .nav-item.active { color: #00e676; transform: translateY(-2px); }
 .bottom-nav .nav-item.active span { display: block; }
 
+}
+
 .cup-icon-sm { position: relative; display: flex; align-items: center; justify-content: center; font-size: 22px; }
 .go-badge-sm { position: absolute; font-size: 10px; font-weight: 900; color: #21252f; background-color: #818793; padding: 2px 6px; border-radius: 6px; top: 28%; transform: translateY(-20%); }
 .bottom-nav .nav-item.active .go-badge-sm { background-color: #00e676; color: #07110a; }
 
-/* ================= 3. MÀN HÌNH CHỜ GAME ĐỘNG & ĐẦY ĐỦ TÍNH NĂNG ================= */
+/* ================= 3. MÀN HÌNH CHỜ GAME DỘNG & ĐẦY ĐỦ TÍNH NĂNG ================= */
 .game-loading-screen {
     position: fixed;
     top: 0;
@@ -429,6 +466,7 @@ body {
     color: #ffffff;
 }
 
+/* Visitor badge (small corner counter) */
 .visitor-badge {
     position: fixed;
     right: 12px;
@@ -441,9 +479,10 @@ body {
     font-size: 12px;
     box-shadow: 0 6px 20px rgba(0,0,0,0.35);
     z-index: 99999;
-    display: none;
+    display: none; /* shown after update */
 }
 
+/* Thanh công cụ đỉnh màn hình Game */
 .game-top-bar {
     width: 100%;
     display: flex;
@@ -492,6 +531,7 @@ body {
 
 .btn-exit-game:hover { background: rgba(255, 255, 255, 0.2); }
 
+/* Khối Hàng chờ Động ở Giữa */
 .game-queue-box {
     background: rgba(18, 20, 26, 0.75);
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -527,6 +567,7 @@ body {
 .highlight-green { color: #00e676; }
 .highlight-yellow { color: #ffd54f; }
 
+/* Thanh tiến trình Loading */
 .loading-bar-container {
     width: 100%;
     height: 6px;
@@ -543,6 +584,7 @@ body {
     transition: width 0.5s ease-out;
 }
 
+/* Khối VIP Boost Banner */
 .vip-boost-banner {
     background: rgba(0, 230, 118, 0.1);
     border: 1px solid rgba(0, 230, 118, 0.3);
@@ -565,6 +607,7 @@ body {
     cursor: pointer;
 }
 
+/* Thông tin kĩ thuật ở Đáy màn hình */
 .game-bottom-info {
     width: 100%;
     display: flex;

@@ -25,15 +25,45 @@ let currentVisits = [];
 let currentServers = [];
 let currentPlans = [];
 
+function ensureAdminNotice() {
+  let el = document.getElementById('adminNotice');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'adminNotice';
+    el.style.position = 'fixed';
+    el.style.top = '12px';
+    el.style.right = '12px';
+    el.style.zIndex = '1050';
+    document.body.appendChild(el);
+  }
+  return el;
+}
+
+function showAdminNotice(message, timeout = 6000) {
+  const container = ensureAdminNotice();
+  const note = document.createElement('div');
+  note.className = 'alert alert-warning';
+  note.style.minWidth = '220px';
+  note.textContent = message;
+  container.appendChild(note);
+  setTimeout(() => note.remove(), timeout);
+}
+
 async function fetchUsers() {
   const tbody = document.querySelector('#usersTable tbody');
   if (tbody) tbody.innerHTML = '<tr><td colspan="5">Loading...</td></tr>';
   try {
-    const res = await fetch('/api/users');
+    if (location.protocol === 'file:') {
+      showAdminNotice('Admin must be opened via the server (http://localhost:5000/admin.html)');
+      throw new Error('Opened via file:// — cannot reach API');
+    }
+    const res = await fetch(`${location.origin}/api/users`);
     if (!res.ok) throw new Error('Network response not ok');
     const users = await res.json();
     currentUsers = Object.values(users || {});
   } catch (e) {
+    console.warn('fetchUsers failed:', e);
+    showAdminNotice('Could not reach backend — showing sample data');
     currentUsers = USER_DATA.slice();
   }
   renderUsers(currentUsers);
@@ -92,10 +122,16 @@ async function onDelete(e) {
 }
 
 function showPanel(panelId) {
-  document.querySelectorAll('.panel').forEach(panel => panel.classList.add('hidden'));
+  document.querySelectorAll('.panel').forEach(panel => {
+    panel.classList.add('hidden');
+    panel.classList.remove('active');
+  });
   document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
   const target = document.getElementById(panelId);
-  if (target) target.classList.remove('hidden');
+  if (target) {
+    target.classList.remove('hidden');
+    target.classList.add('active');
+  }
   const button = document.querySelector(`.sidebar-item[data-panel="${panelId}"]`);
   if (button) button.classList.add('active');
 }
@@ -145,10 +181,13 @@ async function fetchServers() {
   const grid = document.getElementById('serversGrid');
   if (grid) grid.innerHTML = '<div class="server-card">Loading servers...</div>';
   try {
-    const res = await fetch('/api/servers');
+    if (location.protocol === 'file:') throw new Error('file protocol');
+    const res = await fetch(`${location.origin}/api/servers`);
     if (!res.ok) throw new Error('Network response not ok');
     currentServers = await res.json();
   } catch (e) {
+    console.warn('fetchServers failed:', e);
+    showAdminNotice('Could not fetch servers from backend — using defaults');
     currentServers = SERVER_DATA;
   }
   renderServers(currentServers);
@@ -195,10 +234,13 @@ async function fetchPlans() {
   const grid = document.getElementById('plansGrid');
   if (grid) grid.innerHTML = '<div class="plan-card">Loading plans...</div>';
   try {
-    const res = await fetch('/api/plans');
+    if (location.protocol === 'file:') throw new Error('file protocol');
+    const res = await fetch(`${location.origin}/api/plans`);
     if (!res.ok) throw new Error('Network response not ok');
     currentPlans = await res.json();
   } catch (e) {
+    console.warn('fetchPlans failed:', e);
+    showAdminNotice('Could not fetch plans from backend — using defaults');
     currentPlans = PLAN_DATA;
   }
   renderPlans(currentPlans);
@@ -370,7 +412,8 @@ async function fetchVisits() {
   const tbody = document.querySelector('#visitsTable tbody');
   if (tbody) tbody.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
   try {
-    const res = await fetch('/api/visits');
+    if (location.protocol === 'file:') throw new Error('file protocol');
+    const res = await fetch(`${location.origin}/api/visits`);
     if (!res.ok) throw new Error('Network response not ok');
     const data = await res.json();
     currentVisits = data.visits || [];
@@ -378,6 +421,8 @@ async function fetchVisits() {
     const badge = document.getElementById('visitsCount');
     if (badge) badge.textContent = `Visits: ${visitsCount}`;
   } catch (e) {
+    console.warn('fetchVisits failed:', e);
+    showAdminNotice('Could not fetch visits — showing sample logs');
     currentVisits = VISIT_DATA.slice();
     const badge = document.getElementById('visitsCount');
     if (badge) badge.textContent = `Visits: ${currentVisits.length}`;
