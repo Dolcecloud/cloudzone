@@ -24,7 +24,7 @@ DEFAULT_DATA = {
         {"id": "pro", "name": "Pro", "price": "$9.99/mo", "users": "Priority", "status": "Active"},
         {"id": "enterprise", "name": "Enterprise", "price": "$29.99/mo", "users": "Premium", "status": "Active"}
     ],
-    "maintenance": false
+    "maintenance": False
 }
 
 
