@@ -66,23 +66,31 @@ let currentMaintenanceEnabled = false;
 
 // 2. TỰ ĐỘNG KHỞI TẠO ID NGƯỜI DÙNG TỰ ĐỘNG THEO MÁY
 function initDeviceUserId() {
-    let savedId = localStorage.getItem('coffee_go_user_id');
+    const savedLocal = loadLocalUser();
+    let savedId = localStorage.getItem('coffee_go_user_id') || (savedLocal && savedLocal.id);
     if (!savedId) {
         const randomHex = Math.random().toString(16).substring(2, 10) + Math.random().toString(16).substring(2, 10);
         savedId = 'u' + randomHex;
-        localStorage.setItem('coffee_go_user_id', savedId);
     }
-    
+    localStorage.setItem('coffee_go_user_id', savedId);
+
     const userIdDisplay = document.getElementById('userIdDisplay');
     const modalTransferMemo = document.getElementById('modalTransferMemo');
-    
+
     if (userIdDisplay) userIdDisplay.textContent = 'ID: ' + savedId;
     if (modalTransferMemo) modalTransferMemo.textContent = 'CG ' + savedId.substring(0, 9);
 }
 
 // --- Persistent user helpers ---
 function saveLocalUser(user) {
-    try { localStorage.setItem('coffee_go_user', JSON.stringify(user)); } catch (e) { console.warn('saveLocalUser failed', e); }
+    try {
+        if (user && user.id) {
+            localStorage.setItem('coffee_go_user_id', user.id);
+        }
+        localStorage.setItem('coffee_go_user', JSON.stringify(user));
+    } catch (e) {
+        console.warn('saveLocalUser failed', e);
+    }
 }
 
 function loadLocalUser() {
@@ -104,6 +112,46 @@ function applyUserToUI(user) {
     if (userIdDisplay && user.id) userIdDisplay.textContent = 'ID: ' + user.id;
     // show draggable support bubble
     try { createSupportBubble(); } catch (e) { console.warn('createSupportBubble failed', e); }
+}
+
+async function syncLocalUserToServer(user) {
+    if (!user || !user.id) return null;
+    try {
+        const payload = {
+            user_id: user.id,
+            username: user.name || 'Guest',
+            device_type: navigator.userAgent || navigator.platform || 'Unknown'
+        };
+        const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.user) {
+            saveLocalUser(data.user);
+            applyUserToUI(data.user);
+            return data.user;
+        }
+    } catch (e) {
+        console.warn('syncLocalUserToServer failed:', e);
+    }
+    return null;
+}
+
+async function recordAnonymousVisit() {
+    try {
+        if (location.protocol === 'file:') return;
+        const savedUser = loadLocalUser();
+        const payload = savedUser ? { user_id: savedUser.id, username: savedUser.name } : {};
+        await fetch('/api/visit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+    } catch (e) {
+        console.warn('recordAnonymousVisit failed:', e);
+    }
 }
 
 function updateMaintenanceOverlay(enabled) {
@@ -421,11 +469,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnLoginGoogle) btnLoginGoogle.disabled = true;
     if (chkTerms) chkTerms.disabled = true;
 
-    fetchMaintenanceState().finally(() => {
+    fetchMaintenanceState().finally(async () => {
         if (!currentMaintenanceEnabled) {
             if (btnLoginGoogle) btnLoginGoogle.disabled = false;
             if (chkTerms) chkTerms.disabled = false;
         }
+
+        const savedUser = loadLocalUser();
+        if (savedUser && savedUser.id) {
+            const synced = await syncLocalUserToServer(savedUser);
+            if (!synced) {
+                applyUserToUI(savedUser);
+            }
+            renderGames('latest');
+        }
+        recordAnonymousVisit();
     });
 
     // Đăng nhập Google

@@ -16,8 +16,8 @@ const USER_DATA = [
 ];
 
 const VISIT_DATA = [
-  { ts: '2026-07-25 12:32:00', ip: '127.0.0.1', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome' },
-  { ts: '2026-07-25 12:35:45', ip: '127.0.0.1', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) Safari' }
+  { ts: '2026-07-25 12:32:00', ip: '127.0.0.1', ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome', user_id: 'guest-001' },
+  { ts: '2026-07-25 12:35:45', ip: '127.0.0.1', ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) Safari', user_id: 'guest-002' }
 ];
 
 let currentUsers = [];
@@ -503,13 +503,14 @@ function renderVisits(visits) {
   if (!tbody) return;
   tbody.innerHTML = '';
   if (!visits || visits.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4">No visits yet.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5">No visits yet.</td></tr>';
     return;
   }
   visits.slice().reverse().forEach((v, i) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${i + 1}</td>
+      <td>${escapeHtml(v.user_id || v.username || 'Unknown')}</td>
       <td>${escapeHtml(v.ts)}</td>
       <td>${escapeHtml(v.ip)}</td>
       <td style="max-width:420px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">${escapeHtml(v.ua)}</td>
